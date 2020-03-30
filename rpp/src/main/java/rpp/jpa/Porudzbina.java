@@ -1,10 +1,23 @@
 package rpp.jpa;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
 /**
@@ -13,18 +26,27 @@ import java.util.List;
  */
 @Entity
 @NamedQuery(name="Porudzbina.findAll", query="SELECT p FROM Porudzbina p")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Porudzbina implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	/*
+	 * proveriti da li je kompletan at SequenceGenerator 
+	 */
+	
 	@Id
-	@SequenceGenerator(name="PORUDZBINA_ID_GENERATOR" )
+	@SequenceGenerator(name="PORUDZBINA_ID_GENERATOR", sequenceName="PORUDZBINA_SEQ", allocationSize=1)
 	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="PORUDZBINA_ID_GENERATOR")
 	private Integer id;
-
-	@Temporal(TemporalType.DATE)
+	
+	/*
+	 * @Temporal je potrebno samo za verzije jave pre 1.8 (Java 8)
+	 */
+	
+	//@Temporal(TemporalType.DATE)
 	private Date datum;
 
-	@Temporal(TemporalType.DATE)
+	//@Temporal(TemporalType.DATE)
 	private Date isporuceno;
 
 	private BigDecimal iznos;
@@ -35,9 +57,16 @@ public class Porudzbina implements Serializable {
 	@ManyToOne
 	@JoinColumn(name="dobavljac")
 	private Dobavljac dobavljac;
+	
+	/*
+	 * Porudžbina je relacijom jedan prema više povezana sa stavkom porudžbine. Kada se obriše
+	 * porudžbina, potrebno je da budu obrisane i sve povezane stavke poružbine. To se postiže
+	 * dodavanjem parametra cascade = {CascadeType.ALL} unutar @OneToMany anotacije.
+	 */
 
 	//bi-directional many-to-one association to StavkaPorudzbine
-	@OneToMany(mappedBy="porudzbina")
+	@OneToMany(mappedBy="porudzbina", cascade = {CascadeType.ALL})
+	@JsonIgnore
 	private List<StavkaPorudzbine> stavkaPorudzbines;
 
 	public Porudzbina() {

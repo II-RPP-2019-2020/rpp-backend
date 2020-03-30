@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.ApiOperation;
 import rpp.jpa.Artikl;
 import rpp.reps.ArtiklRepository;
 
@@ -51,6 +52,7 @@ public class ArtiklRestController {
 	 * artikala koji će potom u browseru biti prikazani u JSON formatu
 	 */
 	
+	@ApiOperation(value = "Returns collection of all Artikl from database.")
 	@GetMapping("artikl")
 	public Collection<Artikl> getAll(){
 		return artiklRepository.findAll();
@@ -71,6 +73,7 @@ public class ArtiklRestController {
 	 * Vežbe 04
 	 */
 	
+	@ApiOperation(value = "Returns Artikl with id that was forwarded as path variable.")
 	@GetMapping("artikl/{id}")
 	//public Artikl getOne(@PathVariable("id") Integer id) {
 	public ResponseEntity<Artikl> getOne(@PathVariable("id") Integer id) {
@@ -89,6 +92,7 @@ public class ArtiklRestController {
 	 * 
 	 */
 	
+	@ApiOperation(value = "Returns Artikl with name that was forwarded as path variable.")
 	@GetMapping("artikl/naziv/{naziv}")
 	public Collection<Artikl> getByNaziv(@PathVariable("naziv") String naziv){
 		return artiklRepository.findByNazivContainingIgnoreCase(naziv);
@@ -104,6 +108,7 @@ public class ArtiklRestController {
 	 * podataka
 	 */
 	
+	@ApiOperation(value = "Adds instance of Artikl to database.")
 	@PostMapping("artikl")
 	public ResponseEntity<HttpStatus> addArtikl(@RequestBody Artikl artikl) {
 		artiklRepository.save(artikl);
@@ -121,6 +126,7 @@ public class ArtiklRestController {
 	 * i prosleđenim sadržajem u bazi podataka.
 	 */
 	
+	@ApiOperation(value = "Updates Artikl that has id that was forwarded as path variable with values forwarded in Request Body.")
 	@PutMapping(value = "artikl/{id}", produces = "application/json; charset=utf-8")
 	public ResponseEntity<HttpStatus> updateArtikl(@RequestBody Artikl artikl, 
 			@PathVariable("id")Integer id){
@@ -144,9 +150,10 @@ public class ArtiklRestController {
 	 * iz baze podataka.
 	 */
 	
+	@ApiOperation(value = "Deletes Artikl with id that was forwarded as path variable.")
 	@DeleteMapping("artikl/{id}")
 	public ResponseEntity<HttpStatus> delete(@PathVariable Integer id){
-		if(id==-100) {
+		if(id==-100 && !artiklRepository.existsById(id)) {
 			jdbcTemplate.execute("INSERT INTO artikl (\"id\", \"proizvodjac\", \"naziv\") VALUES (-100, 'Test Proizvodjac', 'Test Naziv')");
 		}
 		
